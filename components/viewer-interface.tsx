@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -35,6 +35,7 @@ export function ViewerInterface({ event }: ViewerInterfaceProps) {
   const [partialText, setPartialText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const supabase = getSupabaseBrowserClient();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Load existing captions on mount
   useEffect(() => {
@@ -51,6 +52,13 @@ export function ViewerInterface({ event }: ViewerInterfaceProps) {
         console.error("Error loading captions:", error);
       } else if (data) {
         setCaptions(data);
+        // Scroll to bottom after initial load
+        setTimeout(() => {
+          if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTop =
+              scrollContainerRef.current.scrollHeight;
+          }
+        }, 100);
       }
       setIsLoading(false);
     };
@@ -110,13 +118,6 @@ export function ViewerInterface({ event }: ViewerInterfaceProps) {
     };
   }, [event.uid, supabase]);
 
-  // Get the latest caption (most recent)
-  const latestCaption =
-    captions.length > 0 ? captions[captions.length - 1] : null;
-
-  // Get caption history (all but the latest)
-  const captionHistory = captions.slice(0, -1).reverse();
-
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Event Info */}
@@ -150,28 +151,17 @@ export function ViewerInterface({ event }: ViewerInterfaceProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="bg-background border-2 rounded-lg p-8 min-h-[200px]">
-            {isLoading ? (
+          {isLoading ? (
+            <div className="bg-background border-2 rounded-lg p-8 min-h-[500px] flex items-center justify-center">
               <div className="text-center space-y-3">
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
                 <p className="text-sm text-muted-foreground">
                   Loading captions...
                 </p>
               </div>
-            ) : latestCaption || partialText ? (
-              <div className="w-full space-y-4">
-                {latestCaption && (
-                  <div className="text-2xl leading-relaxed text-center font-medium">
-                    {latestCaption.text}
-                  </div>
-                )}
-                {partialText && (
-                  <div className="text-2xl leading-relaxed text-center font-medium text-primary/70 italic">
-                    {partialText}
-                  </div>
-                )}
-              </div>
-            ) : (
+            </div>
+          ) : captions.length === 0 && !partialText ? (
+            <div className="bg-background border-2 rounded-lg p-8 min-h-[500px] flex items-center justify-center">
               <div className="text-center space-y-3">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                   <Eye className="h-6 w-6 text-primary" />
@@ -184,32 +174,46 @@ export function ViewerInterface({ event }: ViewerInterfaceProps) {
                   starts
                 </p>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div
+              ref={scrollContainerRef}
+              className="bg-background border-2 rounded-lg p-6 min-h-[500px] max-h-[600px] overflow-y-auto space-y-3"
+            >
+              {captions.map((caption) => {
+                const timestamp = new Date(
+                  caption.timestamp
+                ).toLocaleTimeString(undefined, {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                });
+                return (
+                  <div
+                    key={caption.id}
+                    className="p-3 rounded border bg-muted/30"
+                  >
+                    <div className="text-xs text-muted-foreground mb-1">
+                      {timestamp}
+                    </div>
+                    <div className="text-lg leading-relaxed">
+                      {caption.text}
+                    </div>
+                  </div>
+                );
+              })}
+              {partialText && (
+                <div className="p-3 rounded border border-primary/20 bg-primary/5">
+                  <div className="text-xs text-primary/50 mb-1">Live</div>
+                  <div className="text-lg leading-relaxed italic text-primary/70">
+                    {partialText}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
-
-      {/* Caption History */}
-      {captionHistory.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Caption History</CardTitle>
-            <CardDescription>Previous captions from this event</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3 max-h-[400px] overflow-y-auto">
-              {captionHistory.map((caption) => (
-                <div
-                  key={caption.id}
-                  className="text-base leading-relaxed p-3 rounded border bg-muted/30"
-                >
-                  {caption.text}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

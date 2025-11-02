@@ -357,18 +357,34 @@ export function BroadcasterInterface({
               </p>
             )}
 
-            {captions.map((caption) => (
-              <div
-                key={caption.id}
-                className="text-lg leading-relaxed bg-background/50 p-3 rounded border"
-              >
-                {caption.text}
-              </div>
-            ))}
+            {captions.map((caption) => {
+              const timestamp = new Date(caption.timestamp).toLocaleTimeString(
+                undefined,
+                {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                }
+              );
+              return (
+                <div
+                  key={caption.id}
+                  className="bg-background/50 p-3 rounded border"
+                >
+                  <div className="text-xs text-muted-foreground mb-1">
+                    {timestamp}
+                  </div>
+                  <div className="text-lg leading-relaxed">{caption.text}</div>
+                </div>
+              );
+            })}
 
             {partialText && (
-              <div className="text-lg leading-relaxed bg-primary/5 p-3 rounded border border-primary/20 italic">
-                {partialText}
+              <div className="bg-primary/5 p-3 rounded border border-primary/20">
+                <div className="text-xs text-primary/50 mb-1">Live</div>
+                <div className="text-lg leading-relaxed italic">
+                  {partialText}
+                </div>
               </div>
             )}
           </div>
