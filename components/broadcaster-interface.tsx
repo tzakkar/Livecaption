@@ -23,6 +23,13 @@ import Link from "next/link";
 import { useScribe } from "@elevenlabs/react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Event {
   id: string;
@@ -52,6 +59,8 @@ export function BroadcasterInterface({
   const [error, setError] = useState<string | null>(null);
   const [captions, setCaptions] = useState<Caption[]>([]);
   const [partialText, setPartialText] = useState("");
+  const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
   const sequenceNumberRef = useRef(0);
   const supabase = getSupabaseBrowserClient();
   const broadcastChannelRef = useRef<any>(null);
@@ -111,6 +120,38 @@ export function BroadcasterInterface({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Enumerate audio devices
+  useEffect(() => {
+    const getAudioDevices = async () => {
+      try {
+        // Request permission first to get device labels
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+
+        // Stop the stream immediately as we just needed permission
+        stream.getTracks().forEach((track) => track.stop());
+
+        // Now enumerate devices with labels
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputs = devices.filter(
+          (device) => device.kind === "audioinput"
+        );
+        setAudioDevices(audioInputs);
+
+        // Set default device if none selected
+        if (audioInputs.length > 0 && !selectedDeviceId) {
+          setSelectedDeviceId(audioInputs[0].deviceId);
+        }
+      } catch (err) {
+        console.error("Error enumerating devices:", err);
+        setError("Failed to access microphone. Please grant permission.");
+      }
+    };
+
+    getAudioDevices();
+  }, [selectedDeviceId]);
+
   const fetchToken = async () => {
     try {
       const response = await fetch(`/api/scribe-token?eventUid=${event.uid}`);
@@ -135,13 +176,25 @@ export function BroadcasterInterface({
       // Fetch a single use token from the server
       const token = await fetchToken();
 
+      const microphoneOptions: any = {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+      };
+
+      // Only add deviceId if one is selected
+      if (selectedDeviceId) {
+        microphoneOptions.deviceId = selectedDeviceId;
+      }
+
+      console.log(
+        "Starting recording with microphone options:",
+        microphoneOptions
+      );
+
       await scribe.connect({
         token,
-        microphone: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
+        microphone: microphoneOptions,
       });
 
       setIsRecording(true);
@@ -302,12 +355,35 @@ export function BroadcasterInterface({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            {/* Microphone Selector */}
+            {!isRecording && audioDevices.length > 0 && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Select Microphone</label>
+                <Select
+                  value={selectedDeviceId}
+                  onValueChange={setSelectedDeviceId}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Choose a microphone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {audioDevices.map((device) => (
+                      <SelectItem key={device.deviceId} value={device.deviceId}>
+                        {device.label ||
+                          `Microphone ${device.deviceId.slice(0, 8)}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="flex items-center justify-center gap-4 p-8 bg-muted/50 border-2 border-dashed rounded-lg">
               {!isRecording ? (
                 <Button
                   size="lg"
                   onClick={handleStartRecording}
-                  disabled={scribe.isConnected}
+                  disabled={scribe.isConnected || !selectedDeviceId}
                   className="gap-2"
                 >
                   <Mic className="h-5 w-5" />
