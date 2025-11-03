@@ -70,6 +70,57 @@ Ensure your Supabase database has the necessary tables and policies. The caption
 - **Microphone controls**: Start/stop recording with a single click
 - **Live preview**: Broadcasters see what viewers see in real-time
 - **Caption history**: All captions are stored and displayed in chronological order
+- **Real-time translation**: Viewers can translate captions to their preferred language using Chrome's built-in AI (Chrome 138+)
+
+## Real-Time Translation Feature
+
+The viewer interface includes support for **on-device translation** using Chrome's built-in Translator API. This feature allows viewers to translate captions into their preferred language in real-time, without sending data to external servers.
+
+### Browser Requirements
+
+- **Google Chrome 138 or later** with built-in AI features enabled
+- For more information, visit: [Chrome Translator API Documentation](https://developer.chrome.com/docs/ai/translator-api)
+
+### How Translation Works
+
+1. **Feature Detection**: The viewer interface automatically detects if the browser supports the Translator API
+2. **Language Selection**: Viewers can choose from 14+ supported languages via a dropdown menu
+3. **Model Download**: On first use of a language pair, Chrome downloads the translation model (progress is shown)
+4. **On-Device Translation**: All translation happens locally in the browser for maximum privacy and speed
+5. **Real-Time Updates**: Both final captions and partial transcripts are translated as they arrive
+
+### Supported Languages
+
+- English
+- Spanish
+- French
+- German
+- Italian
+- Portuguese
+- Dutch
+- Russian
+- Japanese
+- Korean
+- Chinese (Simplified)
+- Arabic
+- Hindi
+- Turkish
+
+### Translation Benefits
+
+- **Privacy First**: All translation happens on the user's device - no data sent to external servers
+- **Fast & Responsive**: On-device processing means instant translations with no network latency
+- **Works Offline**: Once models are downloaded, translation works even without internet
+- **No API Costs**: Uses Chrome's built-in AI, no translation API fees
+- **Seamless Experience**: Translations update in real-time as new captions arrive
+
+### Browser Compatibility
+
+If the Chrome Translator API is not available:
+
+- An informational message is displayed to the viewer
+- Original captions are still shown normally
+- A link to documentation is provided for users to learn about browser requirements
 
 ## Usage
 
@@ -88,6 +139,7 @@ Ensure your Supabase database has the necessary tables and policies. The caption
 2. The latest caption appears prominently at the top
 3. Caption history is shown below
 4. Captions update automatically in real-time
+5. (Optional) Select a target language from the dropdown to translate captions in real-time
 
 ## Configuration Options
 
@@ -133,6 +185,22 @@ The implementation uses `scribe_realtime_v2`, which provides:
 - Ensure Row Level Security policies allow public reads on the captions table
 - Check that realtime is enabled on the captions table
 - Verify the event_id matches between broadcaster and viewer
+
+### Translation Not Working
+
+- Ensure you're using **Google Chrome 138 or later**
+- Check that Chrome's built-in AI features are enabled (visit `chrome://flags`)
+- Look for the flag: "Enables optimization guide on device" and "Prompt API for Gemini Nano"
+- The first time you select a language, Chrome needs to download the translation model (this may take a few moments)
+- Check the browser console for any translation errors
+- Try selecting "Original (No Translation)" and then reselecting your target language
+
+### Translation Model Download Stuck
+
+- Check your internet connection (models are downloaded on first use)
+- Clear Chrome's cache and restart the browser
+- Try a different language pair
+- Models are cached after first download and work offline thereafter
 
 ## API Reference
 
@@ -181,8 +249,9 @@ Consider adding:
 - Export captions to various formats (SRT, VTT, TXT)
 - Custom styling options for captions
 - Speaker identification
-- Multi-language support
+- ~~Multi-language support~~ ✅ **Implemented with Chrome Translator API**
 - Offline caption viewing
+- Language detection for automatic source language identification
 
 ## Support
 
@@ -197,3 +266,5 @@ For issues with:
 - [ElevenLabs Scribe Documentation](https://elevenlabs.io/docs/api-reference/scribe)
 - [ElevenLabs React SDK](https://www.npmjs.com/package/@elevenlabs/react)
 - [Supabase Realtime](https://supabase.com/docs/guides/realtime)
+- [Chrome Translator API](https://developer.chrome.com/docs/ai/translator-api)
+- [Chrome Built-in AI Overview](https://developer.chrome.com/docs/ai/built-in)

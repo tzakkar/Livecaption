@@ -68,7 +68,7 @@ export function BroadcasterInterface({
   const scribe = useScribe({
     modelId: "scribe_realtime_v2",
     onPartialTranscript: (data) => {
-      console.log("Partial:", data.text);
+      console.log("Partial:", { data });
       setPartialText(data.text);
 
       // Broadcast partial transcript to viewers via Realtime Broadcast
