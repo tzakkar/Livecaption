@@ -12,6 +12,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  ),
   title: "LiveCaptions - Real-time captions for your live events",
   description:
     "Broadcast live captions to your audience with ease. Perfect for conferences, webinars, and presentations.",

@@ -16,6 +16,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Github } from "lucide-react";
 import Link from "next/link";
 
@@ -25,11 +33,19 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showTermsDialog, setShowTermsDialog] = useState(false);
   const router = useRouter();
   const supabase = getSupabaseBrowserClient();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!termsAccepted) {
+      setError("Please accept the privacy terms to continue");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -53,6 +69,11 @@ export default function SignUpPage() {
   };
 
   const handleGithubSignUp = async () => {
+    if (!termsAccepted) {
+      setError("Please accept the privacy terms to continue");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -113,7 +134,7 @@ export default function SignUpPage() {
               variant="outline"
               className="w-full"
               onClick={handleGithubSignUp}
-              disabled={loading}
+              disabled={loading || !termsAccepted}
             >
               <Github className="mr-2 h-4 w-4" />
               Continue with GitHub
@@ -160,12 +181,44 @@ export default function SignUpPage() {
                 Password must be at least 6 characters
               </p>
             </div>
+            <div className="flex items-start space-x-2">
+              <Checkbox
+                id="terms"
+                checked={termsAccepted}
+                onCheckedChange={(checked) =>
+                  setTermsAccepted(checked as boolean)
+                }
+              />
+              <div className="grid gap-1.5 leading-none">
+                <label
+                  htmlFor="terms"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  I accept the privacy terms
+                </label>
+                <p className="text-sm text-muted-foreground">
+                  By signing up, you consent to the recording and storage of
+                  your communications.{" "}
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsDialog(true)}
+                    className="text-primary hover:underline"
+                  >
+                    Read full terms
+                  </button>
+                </p>
+              </div>
+            </div>
             {error && (
               <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
                 {error}
               </div>
             )}
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || !termsAccepted}
+            >
               {loading ? "Creating account..." : "Sign up"}
             </Button>
           </form>
@@ -182,6 +235,46 @@ export default function SignUpPage() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showTermsDialog} onOpenChange={setShowTermsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">
+              Captions.Events Privacy Terms
+            </DialogTitle>
+            <DialogDescription className="text-base leading-relaxed pt-4">
+              By clicking "Sign up" and each time you interact with this
+              service, you consent to the recording, storage, and sharing of
+              your communications with third-party service providers, including
+              ElevenLabs for transcription and Supabase for transcript storage,
+              and as described in the{" "}
+              <a
+                href="https://elevenlabs.io/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline font-medium"
+              >
+                Privacy Policy
+              </a>
+              . If you do not wish to have your conversations recorded and
+              stored, please refrain from using this service.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="outline" onClick={() => setShowTermsDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setTermsAccepted(true);
+                setShowTermsDialog(false);
+              }}
+            >
+              Agree & Continue
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
