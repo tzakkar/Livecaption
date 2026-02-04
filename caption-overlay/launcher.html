@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Caption Overlay – Launcher</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 20px;
+      margin: 0;
+      background: #1a1a1a;
+      color: #e5e5e5;
+      min-height: 100vh;
+    }
+    h1 { font-size: 1rem; margin: 0 0 12px 0; font-weight: 600; }
+    p { font-size: 0.8rem; color: #a0a0a0; margin: 0 0 12px 0; }
+    label { display: block; font-size: 0.75rem; margin-bottom: 4px; color: #a0a0a0; }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #333;
+      border-radius: 8px;
+      background: #262626;
+      color: #e5e5e5;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+    }
+    input::placeholder { color: #666; }
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #0ea5e9;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: #0284c7; }
+  </style>
+</head>
+<body>
+  <h1>Caption Overlay</h1>
+  <p>No window buttons, transparent so you see your video/desktop behind. Paste your viewer URL (with <code>?popup=1</code>).</p>
+  <label for="url">Viewer URL</label>
+  <input
+    id="url"
+    type="text"
+    placeholder="https://yoursite.com/view/YOUR_EVENT_UID?popup=1"
+    value=""
+  />
+  <button type="button" id="open">Open overlay</button>
+  <script>
+    const input = document.getElementById("url");
+    const btn = document.getElementById("open");
+    const base = "http://localhost:3000";
+    const uid = window.location.search.replace(/^\?uid=/, "") || "";
+    if (uid) input.value = base + "/view/" + uid + "?popup=1";
+
+    btn.addEventListener("click", () => {
+      let url = input.value.trim();
+      if (!url) {
+        alert("Please enter the viewer URL (e.g. http://localhost:3000/view/YOUR_UID?popup=1)");
+        return;
+      }
+      if (!url.includes("?popup=1")) url += (url.includes("?") ? "&" : "?") + "popup=1";
+      if (window.captionOverlay) window.captionOverlay.openOverlay(url);
+    });
+  </script>
+</body>
+</html>

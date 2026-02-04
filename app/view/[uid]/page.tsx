@@ -7,10 +7,15 @@ interface ViewPageProps {
   params: Promise<{
     uid: string
   }>
+  searchParams: Promise<{
+    popup?: string
+  }>
 }
 
-export default async function ViewPage({ params }: ViewPageProps) {
+export default async function ViewPage({ params, searchParams }: ViewPageProps) {
   const { uid } = await params
+  const { popup: popupParam } = await searchParams
+  const isPopup = popupParam === "1"
   const supabase = await getSupabaseServerClient()
 
   // Fetch the event (no auth required for viewing)
@@ -18,6 +23,14 @@ export default async function ViewPage({ params }: ViewPageProps) {
 
   if (error || !event) {
     notFound()
+  }
+
+  if (isPopup) {
+    return (
+      <div className="min-h-screen bg-transparent">
+        <ViewerInterface event={event} popup />
+      </div>
+    )
   }
 
   return (

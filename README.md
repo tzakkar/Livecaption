@@ -75,6 +75,11 @@ Visit [http://localhost:3000](http://localhost:3000)
 1. Visit `/view/[uid]`
 2. Select language for on-device translation (Chrome 138+)
 
+**Subtitle overlay (over video, no second window):**
+
+- **Same page:** Use “Use as subtitles over video”, paste a video URL (e.g. YouTube), then “Show caption overlay over video”. Captions sit on top of the video with a see-through bar.
+- **Outside browser (no min/max/close, see-through to desktop):** Run the Electron overlay app: `pnpm run overlay`, paste the viewer URL with `?popup=1`, and open the overlay. See [caption-overlay/README.md](./caption-overlay/README.md).
+
 ## Deployment
 
 Deploy to Vercel:
@@ -85,6 +90,8 @@ Deploy to Vercel:
 
 ## Documentation
 
+- **[SETUP_STATUS.md](./SETUP_STATUS.md)** - Where you are in setup & how to resume
+- **[SETUP.md](./SETUP.md)** - Complete setup guide
 - [SCRIBE_SETUP.md](./SCRIBE_SETUP.md) - ElevenLabs configuration
 - [GITHUB_AUTH_SETUP.md](./GITHUB_AUTH_SETUP.md) - OAuth setup
 - [TRANSLATION_FEATURE.md](./TRANSLATION_FEATURE.md) - Translation details

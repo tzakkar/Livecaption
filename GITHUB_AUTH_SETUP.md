@@ -102,9 +102,21 @@ pnpm dev
 - Verify that the callback route exists at `/app/auth/callback/route.ts`
 - Check browser console and Network tab for detailed error messages
 
+### "Email not confirmed" error
+
+If you see **"Email not confirmed"** when signing in (especially with GitHub):
+
+1. Go to your [Supabase Dashboard](https://supabase.com/dashboard) → select your project
+2. Open **Authentication** → **Providers**
+3. Click **Email** (the built-in email provider)
+4. Turn **OFF** the option **"Confirm email"** (or **"Enable email confirmations"**)
+5. Click **Save**
+
+After this, new and existing users can sign in without confirming their email. For development and when using OAuth (e.g. GitHub), this is usually what you want.
+
 ### Users not being created
 
-- Ensure email confirmations are configured correctly in Supabase
+- Ensure email confirmations are configured correctly in Supabase (see **"Email not confirmed"** above)
 - Check Authentication → Settings → Email templates in your Supabase dashboard
 
 ## Additional Configuration

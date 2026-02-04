@@ -2,7 +2,20 @@
 
 ## Overview
 
-This document describes the implementation of the real-time translation feature using Chrome's built-in Translator API on the viewer page.
+This document describes the implementation of the real-time translation feature on the viewer page. Two options are available:
+
+1. **Chrome Translator API** – On-device translation (Chrome 138+).
+2. **Server translation API** – Optional server-side translation (e.g. [DeepL](https://www.deepl.com/pro-api)) so viewers can translate in any browser.
+
+When both are available, the viewer shows a **Translation** dropdown: **Chrome (on-device)** or **API (server)**. When only the API is configured, translation uses the server. When only Chrome supports translation, the Chrome path is used.
+
+### Enabling server translation (DeepL)
+
+1. Get an API key from [DeepL](https://www.deepl.com/pro-api) (free tier available).
+2. In `.env.local` set:
+   - `TRANSLATION_API_PROVIDER=deepl`
+   - `DEEPL_API_KEY=your_key`
+3. Restart the dev server. The viewer will show **API (server)** when a target language is selected.
 
 ## Implementation Details
 

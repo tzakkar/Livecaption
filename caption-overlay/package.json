@@ -1,0 +1,13 @@
+{
+  "name": "caption-overlay",
+  "version": "1.0.0",
+  "description": "Frameless transparent caption overlay – no minimize/maximize/close, see-through to desktop",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "overlay": "electron ."
+  },
+  "dependencies": {
+    "electron": "^33.0.0"
+  }
+}
